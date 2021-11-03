@@ -11,7 +11,7 @@ import wandb
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
     for gpu in gpus:
-      tf.config.experimental.set_memory_growth(gpu, True)
+        tf.config.experimental.set_memory_growth(gpu, True)
     logical_gpus = tf.config.experimental.list_logical_devices('GPU')
     print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
 
@@ -23,15 +23,21 @@ from config import DEFAULTS, MODELS, LEARNING_SCHEDULES, LOSSES
 
 def init_datasets(config, train_pattern=None, val_pattern=r'.*2019-03-31.*', 
     val_pattern_II=r'.*2019-03-20_ISTANBUL.*', seed=2):
+    # initialize training dataset
     train_set = data.dataset.T4CDatasetTF(config['data_dir'], config['include_cities'], 
         exclude_pattern=r'(%s|%s)' % (val_pattern, val_pattern_II), include_pattern=train_pattern)
+    # initialize validation dataset
     val_set = data.dataset.T4CDatasetTF(config['data_dir'], config['include_cities'], 
         include_pattern=val_pattern, exclude_pattern=train_pattern)
     
     
+    # create two small validation sets that use 16 random time ids each day 
     ts = np.random.RandomState(seed=seed).randint(0, 288-32, 16)
+    # use val_pattern_II to create the first validation set thats frequently run during training
     val_set_II = data.dataset.T4CDatasetTF(config['data_dir'], config['include_cities'], 
         include_pattern=val_pattern_II, timesteps=ts)
+    # use val_pattern_II to create the second validation set thats frequently run during training
+    # this dataset uses the flipped city to validate spatial generalization 
     val_set_II_flipped = data.dataset.T4CDatasetTF(config['data_dir'], config['include_cities'], 
         include_pattern=val_pattern_II, flipped=True, timesteps=ts)
 
@@ -66,6 +72,9 @@ def init_model(model_name, config):
     return model, optimizer
 
 def init_logger(model, config):
+    '''
+    Initializes a new wandb run using config.
+    '''
     model_name = model.architecture
 
     if hasattr(model, 'layer_type'):
@@ -88,9 +97,7 @@ def init_logger(model, config):
     wandb.init(**logger_config)
     
 def train(config):
-
     train_set, val_set, val_sm, val_sm_flip = init_datasets(config)
-    
     loss_fn = LOSSES[config['loss']]
 
     for m in config['model']:

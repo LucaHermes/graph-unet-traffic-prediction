@@ -23,6 +23,10 @@ TSPEC_D_test.append(tf.TensorSpec(shape=None, dtype=tf.float32, name=None))
 
 
 def package_submissions(test_set, submissions, model_id, model_name, challenge_name, out_dir='submissions'):
+    '''
+    Saves the submissions dictionary to h5 files first and then puts them in a single zip-File.
+    The zip-File will be saved to out_dir.
+    '''
     date_time = datetime.now()
     time_str = date_time.strftime('%Y%m%d%H%M')
     out_dir = os.path.join(out_dir, model_id, date_time.isoformat())
@@ -41,7 +45,7 @@ def package_submissions(test_set, submissions, model_id, model_name, challenge_n
                 
             f_part = files[0].split('_')
             meta_file = f_part[:-1] + ['additional'] + f_part[-1:]
-            meta_file = '_'.join(meta_file)
+            meta_file = '_'.join(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meta_file)
             
             data_file = test_set.dyn_files[city][0]
             file_name = os.path.basename(data_file) + '.h5'
@@ -63,6 +67,10 @@ def package_submissions(test_set, submissions, model_id, model_name, challenge_n
         print(f'[Submission] Zip-file created {zip_file}')
 
 def graph_to_image(nodes, img_mask):
+    '''
+    Converts a graph to a uint8 image.
+    img_mask is in image format and contains True at pixels that are a node.
+    '''
     mask_shape = tf.shape(img_mask)
     mask_idx = tf.cast(tf.where(img_mask), tf.int32)
     nodes = tf.scatter_nd(mask_idx, nodes, shape=tf.concat((mask_shape, tf.shape(nodes)[1:]), axis=0))
@@ -70,6 +78,10 @@ def graph_to_image(nodes, img_mask):
 
 @tf.function(input_signature=TSPEC_D_test)
 def predict_sample(sample, img_mask, data_scale=255):
+    '''
+    To speed things up, this is a tf.function that predicts sample and
+    converts it to image format (uint8) using graph_to_image.
+    '''
     pred = model._call(sample)
     pred_img = graph_to_image(pred, img_mask)
     pred_img = tf.stack(tf.split(pred_img, 12, axis=-1))
@@ -82,6 +94,10 @@ def predict_sample(sample, img_mask, data_scale=255):
     return pred_img
 
 def create_submission(model, config, challenge):
+    '''
+    Creates the test-dataset for the given challenge and predicts every sample
+    using the given model.
+    '''
     test_set = data.dataset.T4CDatasetTF(
         config['data_dir'], 
         config['include_cities'],

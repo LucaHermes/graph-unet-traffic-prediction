@@ -7,6 +7,9 @@ import numpy as np
 # -------------------Code to setup the training pipeline -----------------------
 
 def build_data_pipeline(t4c, config):
+    '''
+    Builds the pipeline for the tensorflow datasets-.
+    '''
 
     PI = tf.constant(np.pi)
 
@@ -21,6 +24,10 @@ def build_data_pipeline(t4c, config):
         return x
 
     def add_node_pos(x):
+        '''
+        Adds the 2D node location (position in the pixel grid) to the
+        graph dictionary.
+        '''
         c_idx = t4c.city_lookup.lookup(x['city'])
         c_idx.set_shape(1)
         node_loc = tf.gather(t4c.city_node_loc, c_idx)[0].to_tensor()
@@ -28,24 +35,15 @@ def build_data_pipeline(t4c, config):
         return x
 
     def add_street_map(x):
+        '''
+        Adds the street map (1st channel of the static street data to the
+        image dictionary.
+        '''
         c_idx = t4c.city_lookup.lookup(x['city'])
         c_idx.set_shape(1)
         street_map = tf.gather(t4c.city_street_map, c_idx)[0]
         x['image'] = x.get('image', {})
         x['image']['street_map'] = street_map
-        return x
-    
-    def add_snd_rec_map(x):
-        n_nodes = tf.shape(x['graph']['seed_nodes'])[1]
-        snd_rec_part = tf.nest.map_structure(lambda eid: 
-                      tf.ragged.stack_dynamic_partitions(eid[:,0], eid[:,1], num_partitions=n_nodes), 
-                      x['graph']['edge_index'])
-        snd_rec_map = tf.nest.map_structure(lambda srp: srp.to_tensor(), 
-                      snd_rec_part)
-        snd_rec_mask = tf.nest.map_structure(lambda srp: tf.ones_like(srp, dtype=tf.float32).to_tensor(), 
-                      snd_rec_part)
-        x['graph']['snd_rec_map'] = snd_rec_map
-        x['graph']['snd_rec_mask'] = snd_rec_mask
         return x
 
     def add_temp_encoding(x):
