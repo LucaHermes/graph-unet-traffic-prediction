@@ -64,7 +64,7 @@ class T4CDataset:
     
     @property
     def total_timesteps(self):
-        return sum([ v['timesteps'] for v in self.meta.values() ])
+        return sum([ sum(v['timesteps'].values()) for v in self.meta.values() ])
 
     def get_files(self, directory, pattern, include_pattern=None, exclude_pattern=None):
         files = Path(directory).rglob(pattern)
@@ -345,6 +345,7 @@ class T4CDatasetTF(T4CDataset):
         self.city_edge_count = tf.stack(self.city_edge_count)
         self.prefetch_cache = prefetch_cache if prefetch_cache is not None else tf.data.AUTOTUNE
         self.timesteps = timesteps
+        self.sample_size = None
         self.data_scale = float(data_scale)
         self.out_dir = out_dir
         self.seed = seed
@@ -352,9 +353,19 @@ class T4CDatasetTF(T4CDataset):
 
     @property
     def size(self):
-        lengths = [ self.meta[c]['total_timesteps'] - self.sample_size \
-                    for c in self.cities ]
-        return sum(lengths)
+        if self.timesteps is not None:
+            n_files = len(np.concatenate(list(self.dyn_files.values())))
+            n_timesteps = len(self.timesteps)
+            steps =  n_files *n_timesteps
+        else:
+            steps = 0
+            sample_size = self.sample_size
+            sample_size = 24 if sample_size is None else sample_size
+            time_offset = sample_size - 1
+            for v in self.meta.values():
+                file_timesteps = np.array(list(v['timesteps'].values()))
+                steps += np.sum(file_timesteps - time_offset)
+        return steps
 
     def __iter__(self):
         dataset = self.dataset.prefetch(self.prefetch_cache)

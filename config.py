@@ -9,15 +9,15 @@ import train_utils
 DEFAULTS = {
     # default model hyperparameters
     # The number of units for the first (and last) U-Net block
-    'units'               : 64,
+    'units'               : 32,
     # The number of output neurons (default 96)
     'out_units'           : 12*8,
     # The number of downsampling blocks and upsampling blocks
-    'depth'               : 5,
+    'depth'               : 3,
     # The layer type used in the Graph-UNet model (s. layers/__init__.py)
-    'layer_type'          : 'gcn',
-    'activation'          : None,
-    'use_bias'            : False,
+    'layer_type'          : 'geo_quadrant_gcn',
+    'activation'          : 'relu',
+    'use_bias'            : True,
     # If True, includes a global node in the graph layers (default)
     'use_global'          : True,
     # If True, includes a global node in the graph layers (default)
@@ -30,7 +30,7 @@ DEFAULTS = {
     # group name (used by the wandb logger to group runs)
     'group'               : 'Baselines',
     'batch'               : 1,
-    'epochs'              : 5,
+    'epochs'              : 15,
     'learning_rate'       : 'warmup+expDecay', #1e-3,
     'optimizer'           : 'adam',
     'loss'                : 'mse',
