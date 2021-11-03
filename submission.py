@@ -29,6 +29,9 @@ def package_submissions(test_set, submissions, model_id, model_name, challenge_n
     zip_name = 'submission_%s_%s_%s.zip' % (model_name, challenge_name, time_str)
     zip_file = os.path.join(out_dir, zip_name)
     
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    
     with zipfile.ZipFile(zip_file, 'w') as z:
         for city, files in test_set.dyn_files.items():
             city_path = os.path.join(out_dir, city)
