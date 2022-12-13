@@ -1,7 +1,7 @@
 # Traffic Prediction with a graph-based U-Net architecture
 
 This repo contains code to train and evaluate models to predict traffic volue and speed on the data of the *Traffic4Cast* challenge [[1, 2]](#T4C1).
-[[PDF Version of the Paper]](https://github.com/LucaHermes/graph-unet-traffic-prediction/files/7691026/A_Graph_based_U_Net_Model_for_Predicting_Traffic_in_unseen_Cities.pdf)
+[[PDF Version of the Paper]](https://ieeexplore.ieee.org/document/9892453)
 [[PDF Version of the Slides]](https://github.com/LucaHermes/graph-unet-traffic-prediction/files/7726924/Traffic4Cast.-.Hybrid.Graph.U-Net.pdf)
 
 ![demo_six_cities_2019-04-24_frame156_traffic_sum-1](https://user-images.githubusercontent.com/30961397/139871911-767448ab-2fa5-4b16-8ba8-9c397a5d0e26.png)
@@ -110,6 +110,18 @@ python results.py --model GraphUNet \
              --data_type 'graph' --data_dir data/raw \
              --checkpoint ckpts/GraphUNet/GraphUNet_03-10-2021__16-04-37/ \
              --n_days 3
+```
+
+## Citation
+```
+@INPROCEEDINGS{hermes_graphunet_2022,
+  author={Hermes, Luca and Hammer, Barbara and Melnik, Andrew and Velioglu, Riza and Vieth, Markus and Schilling, Malte},
+  booktitle={2022 International Joint Conference on Neural Networks (IJCNN)},
+  title={A Graph-based U-Net Model for Predicting Traffic in unseen Cities},
+  year={2022},
+  pages={1-8},
+  doi={10.1109/IJCNN55064.2022.9892453}
+}
 ```
 
 ## References
